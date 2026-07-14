@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Videos Musicales - Studio Tech</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Importamos una fuente premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="dropZone" class="drop-zone-fullscreen">
+        <div class="drop-overlay-content">
+            <svg class="upload-icon-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p>Suelta tu archivo de música aquí</p>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Panel Izquierdo: Estilos -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="brand-title">RendexCode</span>
+                <h2 class="section-title">Presets Visuales</h2>
+            </div>
+            
+            <div class="presets-grid">
+                <button class="preset-card active" data-style="bars">
+                    <div class="preset-preview bars-preview"></div>
+                    <span>Barras Neón</span>
+                </button>
+                <button class="preset-card" data-style="double">
+                    <div class="preset-preview double-preview"></div>
+                    <span>Doble Espectro</span>
+                </button>
+                <button class="preset-card" data-style="line">
+                    <div class="preset-preview line-preview"></div>
+                    <span>Rayo Eléctrico</span>
+                </button>
+                <button class="preset-card" data-style="circle">
+                    <div class="preset-preview circle-preview"></div>
+                    <span>Anillo Radiante</span>
+                </button>
+                <button class="preset-card" data-style="particles">
+                    <div class="preset-preview particles-preview"></div>
+                    <span>Lluvia Cosmos</span>
+                </button>
+                <button class="preset-card" data-style="blocks">
+                    <div class="preset-preview blocks-preview"></div>
+                    <span>Bloques Retro</span>
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <label for="audioInput" id="uploadBtn" class="primary-upload-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span>Cargar Música</span>
+                </label>
+                <input type="file" id="audioInput" accept="audio/*" style="display: none;">
+            </div>
+        </aside>
+
+        <!-- Panel Central/Derecho: Previsualización del Video -->
+        <main class="main-preview">
+            <header class="studio-header">
+                <div class="theme-toggles">
+                    <!-- Botón para ocultar/mostrar elementos de información del visor (HUD) -->
+                    <button id="toggleHudBtn" class="hud-toggle-btn" title="Ocultar/Mostrar Textos">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Ocultar Info</span>
+                    </button>
+                    
+                    <button class="theme-btn active" data-theme="blue" title="Tema Azul">🟦</button>
+                    <button class="theme-btn" data-theme="sunset" title="Tema Atardecer">🟥</button>
+                    <button class="theme-btn" data-theme="emerald" title="Tema Cyber">🟩</button>
+                    <button class="theme-btn" data-theme="dark" title="Tema Espacio">⬛</button>
+                </div>
+            </header>
+
+            <div class="viewport-container">
+                <!-- El "Video" Renderizado final -->
+                <div class="video-viewport theme-blue" id="videoViewport">
+                    <!-- Movimos el canvas al fondo del visor directamente -->
+                    <canvas id="visualizerCanvas"></canvas>
+                    
+                    <!-- Información en pantalla del Video -->
+                    <div class="viewport-overlay" id="viewportOverlay">
+                    </div>
+                </div>
+
+                <!-- Metadatos de la canción colocados debajo del visor de video -->
+                <div class="metadata-display" id="metadataDisplay">
+                    <h3 id="trackTitle" class="track-title-text">SELECCIONA UNA PISTA</h3>
+                    <p id="trackArtist" class="track-artist-text">Arrastra un archivo MP3 o haz clic en el reproductor</p>
+                </div>
+            </div>
+
+            <!-- Panel de Controles y Timeline inferior -->
+            <div class="timeline-area">
+                <div class="timeline-controls">
+                    <button id="playBtn" class="play-btn disabled" disabled>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </button>
+                    <button id="pauseBtn" class="play-btn hidden">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    </button>
+                    <span class="timestamp" id="currentDuration">00:00</span>
+                    <span class="time-divider">/</span>
+                    <span class="timestamp" id="totalDuration">00:00</span>
+                </div>
+                
+                <!-- Pista de Onda (Timeline) -->
+                <div class="timeline-track-wrapper">
+                    <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+                    <div class="playhead" id="playhead"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
