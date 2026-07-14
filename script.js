@@ -18,11 +18,6 @@ const ctx = canvas.getContext('2d');
 const waveformCanvas = document.getElementById('waveformCanvas');
 const wCtx = waveformCanvas.getContext('2d');
 
-const playlistContainer = document.getElementById('playlistContainer');
-const playlistCount = document.getElementById('playlistCount');
-let playlist = [];
-let currentTrackIndex = -1;
-
 let audioCtx;
 let audio;
 let audioSource;
@@ -206,121 +201,52 @@ dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
     if (e.dataTransfer.files.length > 0) {
-        handleAudioFiles(e.dataTransfer.files);
+        handleAudioFile(e.dataTransfer.files[0]);
     }
 });
 
 audioInput.addEventListener('change', (e) => {
     if (e.target.files.length > 0) {
-        handleAudioFiles(e.target.files);
+        handleAudioFile(e.target.files[0]);
     }
 });
 
-function handleAudioFiles(files) {
-    const wasEmpty = playlist.length === 0;
-    let addedCount = 0;
-
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('audio/')) continue;
-
-        const fileURL = URL.createObjectURL(file);
-        playlist.push({
-            name: file.name.replace(/\.[^/.]+$/, ""), // strip extension
-            url: fileURL
-        });
-        addedCount++;
-    }
-
-    if (addedCount === 0) {
-        alert('Por favor, selecciona archivos de audio compatibles (MP3, WAV, etc.).');
+function handleAudioFile(file) {
+    if (!file.type.startsWith('audio/')) {
+        alert('Por favor, selecciona un archivo de audio compatible.');
         return;
     }
 
-    updatePlaylistUI();
+    // Set Track info
+    trackTitle.textContent = file.name.replace(/\.[^/.]+$/, ""); // Name without extension
+    trackArtist.textContent = 'Música Importada';
 
-    // Start playing immediately if this was the first import
-    if (wasEmpty && playlist.length > 0) {
-        playTrack(0);
-    }
-}
-
-function playTrack(index) {
-    if (index < 0 || index >= playlist.length) return;
-    currentTrackIndex = index;
-
-    const track = playlist[index];
-    trackTitle.textContent = track.name;
-    trackArtist.textContent = `Pista ${index + 1} de ${playlist.length}`;
+    const fileURL = URL.createObjectURL(file);
 
     if (audio) {
         audio.pause();
     }
 
     audio = new Audio();
-    audio.src = track.url;
+    audio.src = fileURL;
     audio.crossOrigin = "anonymous";
-    audio.loop = false; // Do not loop track, so 'ended' event fires to advance
+    audio.loop = true;
 
-    // Enable play controls
+    // Remove disabled state from timeline play button
     playBtn.classList.remove('disabled');
     playBtn.removeAttribute('disabled');
-
+    
     audio.addEventListener('loadedmetadata', () => {
         totalDuration.textContent = formatTime(audio.duration);
     });
 
     audio.addEventListener('timeupdate', updateSeekhead);
 
-    // Auto-advance playlist when song ends
-    audio.addEventListener('ended', () => {
-        const nextIndex = (currentTrackIndex + 1) % playlist.length;
-        playTrack(nextIndex);
-    });
-
     playBtn.classList.add('hidden');
     pauseBtn.classList.remove('hidden');
 
-    updatePlaylistUI(); // Refresh selected states
     setupAudioContext();
     audio.play();
-}
-
-function updatePlaylistUI() {
-    playlistContainer.innerHTML = '';
-    playlistCount.textContent = `${playlist.length} canción${playlist.length !== 1 ? 'es' : ''}`;
-
-    if (playlist.length === 0) {
-        playlistContainer.innerHTML = '<p class="empty-playlist">Sin canciones cargadas</p>';
-        return;
-    }
-
-    playlist.forEach((track, index) => {
-        const item = document.createElement('div');
-        item.className = `playlist-item ${index === currentTrackIndex ? 'active' : ''}`;
-        
-        const titleSpan = document.createElement('span');
-        titleSpan.className = 'playlist-title';
-        titleSpan.textContent = track.name;
-        titleSpan.title = track.name;
-        
-        item.appendChild(titleSpan);
-
-        if (index === currentTrackIndex) {
-            const playingIcon = document.createElement('span');
-            playingIcon.className = 'playing-icon';
-            playingIcon.textContent = '🔊';
-            item.appendChild(playingIcon);
-        }
-
-        item.addEventListener('click', () => {
-            if (index !== currentTrackIndex) {
-                playTrack(index);
-            }
-        });
-
-        playlistContainer.appendChild(item);
-    });
 }
 
 function setupAudioContext() {
