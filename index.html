@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador de Videos Musicales - Studio Tech</title>
+    <title>RendexCode</title>
     <link rel="stylesheet" href="style.css">
     <!-- Importamos una fuente premium -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -55,12 +55,23 @@
                 </button>
             </div>
 
+            <!-- Sección de Playlist -->
+            <div class="playlist-section">
+                <div class="playlist-header">
+                    <h3>Lista de Pistas</h3>
+                    <span id="playlistCount" class="playlist-count">0 canciones</span>
+                </div>
+                <div id="playlistContainer" class="playlist-container">
+                    <p class="empty-playlist">Sin canciones cargadas</p>
+                </div>
+            </div>
+
             <div class="sidebar-footer">
                 <label for="audioInput" id="uploadBtn" class="primary-upload-btn">
                     <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     <span>Cargar Música</span>
                 </label>
-                <input type="file" id="audioInput" accept="audio/*" style="display: none;">
+                <input type="file" id="audioInput" accept="audio/*" style="display: none;" multiple>
             </div>
         </aside>
 
